@@ -24,6 +24,6 @@ npm test
 npm run lint
 ```
 
-The demo includes an incremental Gallo Giro concha scenario, shared schedule state, forecast filters, order and recipe views, lot lookup, quality release confirmation, an R365 adapter simulation with idempotency keys, and a local Reset demo action.
+The demo includes an incremental Gallo Giro concha scenario, shared schedule state, forecast filters, order and recipe views, lot lookup, quality release confirmation, an R365 adapter simulation with idempotency keys, a local Reset demo action, and shared English/Spanish UI switching from the top bar.
 
 Remaining production work: connect a backend and audit store, replace sample data with approved master data, implement the R365 adapter after endpoint validation, and connect Olivia through server-side read-only tools with explicit human approvals.
