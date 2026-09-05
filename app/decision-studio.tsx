@@ -51,12 +51,12 @@ export default function DecisionStudio({go,scenarioPlan,onApply,onCancel}:{go:(s
   </section>
   <section className="floor-panel">
    <div className="section-line"><div><p className="eyebrow">{t("FACTORY ORCHESTRATION")}</p><h2>{t("The day, in motion.")}</h2></div><button onClick={()=>go("production")}>{t("Open production board")} <ArrowRight size={16}/></button></div>
-   <div className="schedule-scroll"><div className="schedule"><div className="time-axis"><span>PRODUCTION LINE</span>{["04:00","06:00","08:00","10:00","12:00","14:00","16:00","18:00"].map(t=><span key={t}>{t}</span>)}</div>
-   {["01 / Bread & rolls","02 / Sweet bread","03 / Specialty"].map((line,i)=><div className="schedule-row" key={line}><div className="line-name"><Factory size={19}/><strong>{line}</strong><small>{i===1?"Changeover at 10:35":"Running to plan"}</small></div><div className="schedule-track">
-    <button style={{left:"0%",width:i===0?"31%":"24%"}} className={"schedule-block block-"+i} onClick={()=>setDetail(i===0?"Bolillo · 18,000 units":i===1?"Concha Rosa · 12,400 units":"Telera · 9,600 units")}><strong>{i===0?"Bolillo":i===1?"Concha Rosa":"Telera"}</strong><span>{i===0?"18,000":i===1?"12,400":"9,600"} units · {i===0?"Baking":"In progress"}</span></button>
-    <button style={{left:i===0?"35%":"28%",width:"23%"}} className="schedule-block block-neutral" onClick={()=>setDetail("Scheduled batch · ingredient check pending")}><strong>{i===0?"Telera":i===1?"Chocolate concha":"Empanada"}</strong><span>Next batch · ready</span></button>
+  <div className="schedule-scroll"><div className="schedule"><div className="time-axis"><span>{t("PRODUCTION LINE")}</span>{["04:00","06:00","08:00","10:00","12:00","14:00","16:00","18:00"].map(t=><span key={t}>{t}</span>)}</div>
+  {["01 / Bread & rolls","02 / Sweet bread","03 / Specialty"].map((line,i)=><div className="schedule-row" key={line}><div className="line-name"><Factory size={19}/><strong>{t(line)}</strong><small>{i===1?t("Changeover at 10:35"):t("Running to plan")}</small></div><div className="schedule-track">
+   <button style={{left:"0%",width:i===0?"31%":"24%"}} className={"schedule-block block-"+i} onClick={()=>setDetail(i===0?"Bolillo · 18,000 units":i===1?"Concha Rosa · 12,400 units":"Telera · 9,600 units")}><strong>{i===0?"Bolillo":i===1?"Concha Rosa":"Telera"}</strong><span>{i===0?"18,000":i===1?"12,400":"9,600"} {t("units")} · {i===0?t("Baking"):t("In progress")}</span></button>
+   <button style={{left:i===0?"35%":"28%",width:"23%"}} className="schedule-block block-neutral" onClick={()=>setDetail("Scheduled batch · ingredient check pending")}><strong>{i===0?"Telera":i===1?"Chocolate concha":"Empanada"}</strong><span>{t("Next batch · ready")}</span></button>
     {scenarioPlan&&i===(scenarioPlan.option===1?2:1)&&<button className="schedule-block block-new" style={{left:"58%",width:"38%"}} onClick={()=>setDetail("Scenario order · "+scenarioPlan.qty.toLocaleString()+" conchas")}><strong>+ Gallo Giro · {scenarioPlan.qty.toLocaleString()}</strong><span>{scenarioPlan.option===2?"Saturday":times.join("–")} · demo plan</span></button>}
-    <div className="now-line" style={{left:"31%"}}><span>{i===0?"NOW · 09:00":""}</span></div>
+    <div className="now-line" style={{left:"31%"}}><span>{i===0?t("NOW · 09:00"):""}</span></div>
    </div></div>)}</div></div>
   <div className="schedule-footer"><span><i/>{t("Current batches")}</span><span><i/>{t("Upcoming batches")}</span><span>{t("Schematic demo · timings are illustrative")}</span></div>
   </section>

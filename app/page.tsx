@@ -169,10 +169,10 @@ function Production({ scenarioPlan }: { scenarioPlan: ScenarioPlan | null }) {
   return <div className="screen">
     <PageLead kicker="Live production · Shift A" title="Production board" copy="See every batch, line constraint and handoff from mixing to cold storage." action={<Button className="dark-btn"><Factory /> {t("Create batch")}</Button>} />
     <section className="production-stats">
-      {[["Shift target", "124,000", "units"], ["Completed", "71%", "88,040 units"], ["Downtime", "18 min", "-9 min vs target"], ["Next changeover", "10:35", "Line 2 · 24 min"]].map(x => <div key={x[0]}><span>{x[0]}</span><strong>{x[1]}</strong><small>{x[2]}</small></div>)}
+        {[['Shift target', '124,000', 'units'], ['Completed', '71%', '88,040 units'], ['Downtime', '18 min', '-9 min vs target'], ['Next changeover', '10:35', 'Line 2 · 24 min']].map(x => <div key={x[0]}><span>{t(x[0])}</span><strong>{x[1]}</strong><small>{t(x[2])}</small></div>)}
     </section>
     <section className="board">{columns.map((col, ci) => <div className="board-col" key={col}>
-      <header><span>{col}</span><b>{ci === 0 ? 3 : ci === 1 ? 4 : 2}</b></header>
+      <header><span>{t(col)}</span><b>{ci === 0 ? 3 : ci === 1 ? 4 : 2}</b></header>
       {batches.map((batch, i) => {
         const id = batch.id + "-" + ci; const progress = ci === 0 ? 8 + i * 5 : ci === 2 ? 90 + i * 3 : batch.progress;
         return <button className={`batch ${selected === id ? "selected" : ""}`} key={id} onClick={() => setSelected(id)}>
@@ -288,7 +288,7 @@ function Olivia({ open, setOpen }: { open: boolean; setOpen: (value: boolean) =>
   return <Sheet open={open} onOpenChange={setOpen}><SheetContent className="olivia-sheet sm:max-w-[470px]">
     <SheetHeader><div className="olivia-mark"><Sparkles /></div><SheetTitle>{t("Olivia · Production intelligence")}</SheetTitle><SheetDescription>{t("Demo conversation only. No AI service or R365 connection is active.")}</SheetDescription></SheetHeader>
     <div className="thread"><div className="message"><span>O</span><p>{locale === "es" ? "Buenos días. Encontré un riesgo accionable: la cobertura de manteca está por debajo del objetivo de tres días mientras aumenta la demanda de conchas de chocolate." : "Good morning. I found one actionable risk: shortening coverage is below the three-day target while chocolate concha demand is rising."}</p></div>
-      {sent && <div className="message message--user"><span>CB</span><p>{prompt}</p></div>}
+       {[["Objectif de production", "124,000", "unités"], ["Complété", "71%", "88,040 unités"], ["Temps d'arrêt", "18 min", "-9 min par rapport à l'objectif"], ["Prochain changement", "10:35", "Ligne 2 · 24 min"]].map(x => <div key={x[0]}><span>{t(x[0])}</span><strong>{x[1]}</strong><small>{t(x[2])}</small></div>)}
       <div className="suggestions">{(locale === "es" ? ["Crear el plan de producción óptimo de mañana", "Explicar el retraso de la línea 2", "¿Qué lotes requieren atención?"] : ["Build tomorrow’s optimal production plan", "Explain the Line 2 delay", "Which lots need attention?"]).map(x => <button key={x} onClick={() => { setPrompt(x); setSent(false); }}>{x}<ArrowRight /></button>)}</div>
     </div>
     <div className="composer"><textarea value={prompt} onChange={e => { setPrompt(e.target.value); setSent(false); }} placeholder={locale === "es" ? "Pregunta a Olivia sobre demanda, producción o calidad…" : "Ask Olivia about demand, production or quality…"} /><button aria-label={t("Send")} onClick={() => prompt.trim() && setSent(true)}><ArrowUpRight /></button></div>
