@@ -1,11 +1,11 @@
 declare module "cloudflare:workers" {
   export const env: {
-    DB?: unknown;
+    DB?: Parameters<typeof import("drizzle-orm/d1").drizzle>[0];
   };
 }
+
+type D1Database = Parameters<typeof import("drizzle-orm/d1").drizzle>[0];
 
 interface Fetcher {
   fetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response>;
 }
-
-type D1Database = Record<string, unknown>;
