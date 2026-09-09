@@ -5,6 +5,7 @@ import { createContext, useContext, useEffect, useMemo, useState } from "react";
 export type Locale = "en" | "es";
 
 const translations: Record<string, string> = {
+  "R365 · demo adapter": "R365 · adaptador de demo",
   "Costs & revenue": "Costos e ingresos",
   "Workforce & payroll": "Personal y nómina",
   "Command center": "Centro de control",
