@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import DecisionStudio, { type ScenarioPlan } from "./decision-studio";
+import { CostsStudio, WorkforceStudio, useOperationsDemo } from "./updates/operations";
 import { LocaleProvider, useLocale } from "@/lib/i18n";
 import {
   Activity, ArrowDownRight, ArrowRight, ArrowUpRight, BadgeCheck, Boxes,
@@ -20,12 +21,14 @@ import {
   SidebarMenuItem, SidebarProvider, SidebarTrigger,
 } from "@/components/ui/sidebar";
 
-type Screen = "command" | "forecast" | "production" | "traceability" | "quality" | "sync" | "orders" | "recipes";
+type Screen = "command" | "forecast" | "production" | "traceability" | "quality" | "sync" | "orders" | "recipes" | "costs" | "workforce";
 
 const NAV: { id: Screen; label: string; icon: typeof Gauge }[] = [
   { id: "command", label: "Command center", icon: Gauge },
   { id: "forecast", label: "Demand & forecast", icon: Activity },
   { id: "production", label: "Production board", icon: Factory },
+  { id: "costs", label: "Costs & revenue", icon: Activity },
+  { id: "workforce", label: "Workforce & payroll", icon: TimerReset },
   { id: "traceability", label: "Batch traceability", icon: Layers3 },
   { id: "quality", label: "Quality control", icon: ClipboardCheck },
   { id: "sync", label: "R365 sync", icon: CloudCog },
@@ -300,12 +303,13 @@ function HomeContent() {
   const [active, setActive] = useState<Screen>("command");
   const [olivia, setOlivia] = useState(false);
   const [scenarioPlan, setScenarioPlan] = useState<ScenarioPlan | null>(null);
-  const resetDemo = () => setScenarioPlan(null);
+  const operations = useOperationsDemo();
+  const resetDemo = () => { setScenarioPlan(null); operations.reset(); };
   const title = useMemo(() => t(NAV.find(x => x.id === active)?.label ?? ""), [active, t]);
-  const content = active === "command" ? <DecisionStudio go={setActive} scenarioPlan={scenarioPlan} onApply={setScenarioPlan} onCancel={() => setScenarioPlan(null)} /> : active === "forecast" ? <Forecast /> : active === "production" ? <Production scenarioPlan={scenarioPlan} /> : active === "traceability" ? <Traceability /> : active === "quality" ? <Quality /> : active === "sync" ? <Sync /> : active === "orders" ? <Orders /> : <Recipes />;
+  const content = active === "costs" ? <CostsStudio key={operations.resetVersion} demo={operations} /> : active === "workforce" ? <WorkforceStudio key={operations.resetVersion} demo={operations} /> : active === "command" ? <DecisionStudio go={setActive} scenarioPlan={scenarioPlan} onApply={setScenarioPlan} onCancel={() => setScenarioPlan(null)} /> : active === "forecast" ? <Forecast /> : active === "production" ? <Production scenarioPlan={scenarioPlan} /> : active === "traceability" ? <Traceability /> : active === "quality" ? <Quality /> : active === "sync" ? <Sync /> : active === "orders" ? <Orders /> : <Recipes />;
   return <SidebarProvider defaultOpen>
     <Sidebar collapsible="icon" className="app-sidebar">
-      <SidebarHeader className="brand-block"><button className="brand" onClick={() => setActive("command")}><span>A</span><div><strong>ARTIMEX</strong><small>BAKERY OS</small></div></button></SidebarHeader>
+      <SidebarHeader className="brand-block"><button className="brand" onClick={() => setActive("command")}><span>O7</span><div><strong>O7</strong><small>BAKERY OS</small></div></button></SidebarHeader>
       <SidebarContent>
         <SidebarGroup><SidebarGroupLabel>{t("Operations")}</SidebarGroupLabel><SidebarGroupContent><SidebarMenu>{NAV.map(x => { const Icon = x.icon; return <SidebarMenuItem key={x.id}><SidebarMenuButton tooltip={t(x.label)} isActive={active === x.id} onClick={() => setActive(x.id)}><Icon /><span>{t(x.label)}</span>{x.id === "quality" && <i className="nav-alert" />}</SidebarMenuButton></SidebarMenuItem>; })}</SidebarMenu></SidebarGroupContent></SidebarGroup>
         <SidebarGroup><SidebarGroupLabel>{t("Workspace")}</SidebarGroupLabel><SidebarGroupContent><SidebarMenu><SidebarMenuItem><SidebarMenuButton isActive={active === "orders"} onClick={() => setActive("orders")}><Truck /><span>{t("Orders & shipping")}</span></SidebarMenuButton></SidebarMenuItem><SidebarMenuItem><SidebarMenuButton isActive={active === "recipes"} onClick={() => setActive("recipes")}><Boxes /><span>{t("Recipes & items")}</span></SidebarMenuButton></SidebarMenuItem></SidebarMenu></SidebarGroupContent></SidebarGroup>

@@ -40,3 +40,9 @@ next-env.d.ts
 /.sites-runtime/
 /outputs/
 /work/
+
+# Private workbook inputs must stay local
+/private-data/
+/charles-production.json
+/reconciliation.json
+/O7-Bakery-OS-Codex-Update.zip

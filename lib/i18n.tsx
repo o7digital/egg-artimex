@@ -5,6 +5,8 @@ import { createContext, useContext, useEffect, useMemo, useState } from "react";
 export type Locale = "en" | "es";
 
 const translations: Record<string, string> = {
+  "Costs & revenue": "Costos e ingresos",
+  "Workforce & payroll": "Personal y nómina",
   "Command center": "Centro de control",
   "Demand & forecast": "Demanda y pronóstico",
   "Quality control": "Control de calidad",
