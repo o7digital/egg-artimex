@@ -8,8 +8,8 @@ import "./updates/operations.css";
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const metadata: Metadata = {
-  title: "O7 Bakery Intelligence · Artimex Command Center",
-  description: "Read-only sales, product and customer intelligence for Artimex using GlobalBake data.",
+  title: "O7 Bakery OS",
+  description: "Operational bakery intelligence for Artimex — production, planning, traceability, quality and R365 synchronization.",
   other: { "codex-preview": "development" },
   icons: { icon: "/favicon.svg", shortcut: "/favicon.svg" },
 };
