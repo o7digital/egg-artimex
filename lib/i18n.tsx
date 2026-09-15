@@ -7,6 +7,7 @@ export type Locale = "en" | "es";
 const translations: Record<string, string> = {
   "R365 · demo adapter": "R365 · adaptador de demo",
   "Costs & revenue": "Costos e ingresos",
+  "GlobalBake BI Reports": "Reportes BI de GlobalBake",
   "Workforce & payroll": "Personal y nómina",
   "Command center": "Centro de control",
   "Demand & forecast": "Demanda y pronóstico",

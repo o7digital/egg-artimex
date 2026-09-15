@@ -3,9 +3,10 @@
 import { useMemo, useState } from "react";
 import DecisionStudio, { type ScenarioPlan } from "./decision-studio";
 import { CostsStudio, WorkforceStudio, useOperationsDemo } from "./updates/operations";
+import GlobalBakeBI from "./globalbake-bi";
 import { LocaleProvider, useLocale } from "@/lib/i18n";
 import {
-  Activity, ArrowDownRight, ArrowRight, ArrowUpRight, BadgeCheck, Boxes,
+  Activity, ArrowDownRight, ArrowRight, ArrowUpRight, BadgeCheck, BarChart3, Boxes,
   BrainCircuit, Check, ChevronDown, CircleAlert, ClipboardCheck,
   CloudCog, Factory, Gauge, Layers3, PackageCheck, RefreshCw, Search,
   ShieldCheck, Sparkles, ThermometerSnowflake, TimerReset, Truck, Wheat,
@@ -21,10 +22,11 @@ import {
   SidebarMenuItem, SidebarProvider, SidebarTrigger,
 } from "@/components/ui/sidebar";
 
-type Screen = "command" | "forecast" | "production" | "traceability" | "quality" | "sync" | "orders" | "recipes" | "costs" | "workforce";
+type Screen = "command" | "forecast" | "production" | "traceability" | "quality" | "sync" | "orders" | "recipes" | "costs" | "workforce" | "bi";
 
 const NAV: { id: Screen; label: string; icon: typeof Gauge }[] = [
   { id: "command", label: "Command center", icon: Gauge },
+  { id: "bi", label: "GlobalBake BI Reports", icon: BarChart3 },
   { id: "forecast", label: "Demand & forecast", icon: Activity },
   { id: "production", label: "Production board", icon: Factory },
   { id: "costs", label: "Costs & revenue", icon: Activity },
@@ -306,7 +308,7 @@ function HomeContent() {
   const operations = useOperationsDemo();
   const resetDemo = () => { setScenarioPlan(null); operations.reset(); };
   const title = useMemo(() => t(NAV.find(x => x.id === active)?.label ?? ""), [active, t]);
-  const content = active === "costs" ? <CostsStudio key={operations.resetVersion} demo={operations} /> : active === "workforce" ? <WorkforceStudio key={operations.resetVersion} demo={operations} /> : active === "command" ? <DecisionStudio go={setActive} scenarioPlan={scenarioPlan} onApply={setScenarioPlan} onCancel={() => setScenarioPlan(null)} /> : active === "forecast" ? <Forecast /> : active === "production" ? <Production scenarioPlan={scenarioPlan} /> : active === "traceability" ? <Traceability /> : active === "quality" ? <Quality /> : active === "sync" ? <Sync /> : active === "orders" ? <Orders /> : <Recipes />;
+  const content = active === "bi" ? <GlobalBakeBI /> : active === "costs" ? <CostsStudio key={operations.resetVersion} demo={operations} /> : active === "workforce" ? <WorkforceStudio key={operations.resetVersion} demo={operations} /> : active === "command" ? <DecisionStudio go={setActive} scenarioPlan={scenarioPlan} onApply={setScenarioPlan} onCancel={() => setScenarioPlan(null)} /> : active === "forecast" ? <Forecast /> : active === "production" ? <Production scenarioPlan={scenarioPlan} /> : active === "traceability" ? <Traceability /> : active === "quality" ? <Quality /> : active === "sync" ? <Sync /> : active === "orders" ? <Orders /> : <Recipes />;
   return <SidebarProvider defaultOpen>
     <Sidebar collapsible="icon" className="app-sidebar">
       <SidebarHeader className="brand-block"><button className="brand" onClick={() => setActive("command")}><span>O7</span><div><strong>O7</strong><small>BAKERY OS</small></div></button></SidebarHeader>
