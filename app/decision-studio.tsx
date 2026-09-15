@@ -1,15 +1,25 @@
 "use client";
-import {useState} from "react";
+import {useRef,useState} from "react";
 import {ArrowRight, Sparkles, Factory, CircleCheck, Clock3, Package, ArrowUpRight, TriangleAlert} from "lucide-react";
 import {Slider} from "@/components/ui/slider";
 import {Sheet,SheetContent,SheetHeader,SheetTitle,SheetDescription} from "@/components/ui/sheet";
 import {useLocale} from "@/lib/i18n";
+import "./schedule-drag.css";
 
 const money=(n:number,locale:"en"|"es")=>n.toLocaleString(locale === "es" ? "es-US" : "en-US",{style:"currency",currency:"USD",maximumFractionDigits:0});
+const INITIAL_BATCH_POSITIONS:Record<string,number>={"current-0":0,"current-1":0,"current-2":0,"next-0":35,"next-1":28,"next-2":28,"scenario":58};
+const HALF_HOUR_PERCENT=100/28;
+const batchTime=(left:number,width:number)=>{
+ const format=(percent:number)=>{const minutes=Math.round((4*60)+(percent/100)*14*60);return `${String(Math.floor(minutes/60)).padStart(2,"0")}:${String(minutes%60).padStart(2,"0")}`};
+ return `${format(left)}–${format(left+width)}`;
+};
 export type ScenarioPlan = {qty:number; option:number; delivery:string; hours:number; contribution:number};
 export default function DecisionStudio({go,scenarioPlan,onApply,onCancel}:{go:(s:"production"|"quality"|"sync"|"traceability")=>void;scenarioPlan:ScenarioPlan|null;onApply:(plan:ScenarioPlan)=>void;onCancel:()=>void}){
  const {locale,t}=useLocale();
  const [qty,setQty]=useState(scenarioPlan?.qty??20000),[option,setOption]=useState(scenarioPlan?.option??0),[detail,setDetail]=useState<string|null>(null);
+ const [batchPositions,setBatchPositions]=useState<Record<string,number>>(INITIAL_BATCH_POSITIONS);
+ const dragRef=useRef<{key:string;startX:number;startLeft:number;trackWidth:number;width:number}|null>(null);
+ const movedRef=useRef(false);
  const overtime=Math.max(0,qty-12000)/2500;
  const cost=qty*.58+(option===0?overtime*180:option===1?240:0);
  const margin=qty*1.05-cost;
@@ -26,6 +36,34 @@ export default function DecisionStudio({go,scenarioPlan,onApply,onCancel}:{go:(s
  ];
  function change(n:number){setQty(n);onCancel()}
  function applyScenario(){onApply({qty,option,delivery:option===2?"Saturday morning":"Friday delivery",hours:overtime,contribution:margin})}
+ function startBatchDrag(e:React.PointerEvent<HTMLButtonElement>,key:string,width:number){
+  if(e.button!==0)return;
+  const track=e.currentTarget.parentElement;
+  if(!track)return;
+  e.currentTarget.setPointerCapture(e.pointerId);
+  dragRef.current={key,startX:e.clientX,startLeft:batchPositions[key]??0,trackWidth:track.clientWidth,width};
+  movedRef.current=false;
+ }
+ function moveBatch(e:React.PointerEvent<HTMLButtonElement>){
+  const drag=dragRef.current;
+  if(!drag)return;
+  const delta=e.clientX-drag.startX;
+  if(Math.abs(delta)>3)movedRef.current=true;
+  const raw=drag.startLeft+(delta/drag.trackWidth)*100;
+  const snapped=Math.round(raw/HALF_HOUR_PERCENT)*HALF_HOUR_PERCENT;
+  setBatchPositions(previous=>({...previous,[drag.key]:Math.max(0,Math.min(100-drag.width,snapped))}));
+ }
+ function endBatchDrag(e:React.PointerEvent<HTMLButtonElement>){
+  if(e.currentTarget.hasPointerCapture(e.pointerId))e.currentTarget.releasePointerCapture(e.pointerId);
+  dragRef.current=null;
+ }
+ function moveBatchWithKeys(e:React.KeyboardEvent<HTMLButtonElement>,key:string,width:number){
+  if(e.key!=="ArrowLeft"&&e.key!=="ArrowRight")return;
+  e.preventDefault();
+  const delta=e.key==="ArrowRight"?HALF_HOUR_PERCENT:-HALF_HOUR_PERCENT;
+  setBatchPositions(previous=>({...previous,[key]:Math.max(0,Math.min(100-width,(previous[key]??0)+delta))}));
+ }
+ function showBatchDetail(value:string){if(movedRef.current){movedRef.current=false;return}setDetail(value)}
  return <div className="studio">
     <div className="studio-heading"><div><p className="eyebrow">ARTIMEX / {locale === "es" ? "INTELIGENCIA OPERATIVA" : "OPERATIONS INTELLIGENCE"}</p><h1>{t("Ahead of the next batch.")}</h1><p>{t("Your factory, your orders, your next decision.")}</p></div><span className="demo-chip">{t("INTERACTIVE DEMO · SAMPLE DATA")}</span></div>
     <div className="pulse-strip">{[["Scheduled output","124,000","units today"],["On-time dispatch","98.6%","+2.1 pts this week"],["Yield","97.8%","target 97.0%"],["Capacity available","16%","before overtime"]].map((m,i)=><div key={m[0]}><span>{t(m[0])}</span><strong>{m[1]}<ArrowUpRight size={18}/></strong><small>{t(m[2])}</small><div className="micro-bars" aria-hidden="true">{[20,35,28,45,36,54,42,58,48,66,58,75].map((h,j)=><i key={j} style={{height:h/3,width:4,opacity:j>8?1:.25,background:i===2?"#367866":"#de3470"}}/>)}</div></div>)}</div>
@@ -51,13 +89,14 @@ export default function DecisionStudio({go,scenarioPlan,onApply,onCancel}:{go:(s
   </section>
   <section className="floor-panel">
    <div className="section-line"><div><p className="eyebrow">{t("FACTORY ORCHESTRATION")}</p><h2>{t("The day, in motion.")}</h2></div><button onClick={()=>go("production")}>{t("Open production board")} <ArrowRight size={16}/></button></div>
+  <div className="schedule-demo-note"><span>{locale === "es" ? "Arrastra los lotes para simular otro horario · ajuste cada 30 min" : "Drag batches to simulate a different schedule · snaps every 30 min"}</span><button onClick={()=>setBatchPositions(INITIAL_BATCH_POSITIONS)}>{locale === "es" ? "Restablecer horarios" : "Reset schedule"}</button></div>
   <div className="schedule-scroll"><div className="schedule"><div className="time-axis"><span>{t("PRODUCTION LINE")}</span>{["04:00","06:00","08:00","10:00","12:00","14:00","16:00","18:00"].map(t=><span key={t}>{t}</span>)}</div>
-  {["01 / Bread & rolls","02 / Sweet bread","03 / Specialty"].map((line,i)=><div className="schedule-row" key={line}><div className="line-name"><Factory size={19}/><strong>{t(line)}</strong><small>{i===1?t("Changeover at 10:35"):t("Running to plan")}</small></div><div className="schedule-track">
-   <button style={{left:"0%",width:i===0?"31%":"24%"}} className={"schedule-block block-"+i} onClick={()=>setDetail(i===0?"Bolillo · 18,000 units":i===1?"Concha Rosa · 12,400 units":"Telera · 9,600 units")}><strong>{i===0?"Bolillo":i===1?"Concha Rosa":"Telera"}</strong><span>{i===0?"18,000":i===1?"12,400":"9,600"} {t("units")} · {i===0?t("Baking"):t("In progress")}</span></button>
-   <button style={{left:i===0?"35%":"28%",width:"23%"}} className="schedule-block block-neutral" onClick={()=>setDetail("Scheduled batch · ingredient check pending")}><strong>{i===0?"Telera":i===1?"Chocolate concha":"Empanada"}</strong><span>{t("Next batch · ready")}</span></button>
-    {scenarioPlan&&i===(scenarioPlan.option===1?2:1)&&<button className="schedule-block block-new" style={{left:"58%",width:"38%"}} onClick={()=>setDetail("Scenario order · "+scenarioPlan.qty.toLocaleString()+" conchas")}><strong>+ Gallo Giro · {scenarioPlan.qty.toLocaleString()}</strong><span>{scenarioPlan.option===2?"Saturday":times.join("–")} · demo plan</span></button>}
+  {["01 / Bread & rolls","02 / Sweet bread","03 / Specialty"].map((line,i)=>{const currentWidth=i===0?31:24,nextWidth=23;return <div className="schedule-row" key={line}><div className="line-name"><Factory size={19}/><strong>{t(line)}</strong><small>{i===1?t("Changeover at 10:35"):t("Running to plan")}</small></div><div className="schedule-track">
+   <button style={{left:`${batchPositions[`current-${i}`]}%`,width:`${currentWidth}%`}} className={"schedule-block draggable-batch block-"+i} data-time={batchTime(batchPositions[`current-${i}`],currentWidth)} aria-label={`${i===0?"Bolillo":i===1?"Concha Rosa":"Telera"}, ${batchTime(batchPositions[`current-${i}`],currentWidth)}. ${locale === "es" ? "Arrastrar para reprogramar" : "Drag to reschedule"}`} onPointerDown={e=>startBatchDrag(e,`current-${i}`,currentWidth)} onPointerMove={moveBatch} onPointerUp={endBatchDrag} onPointerCancel={endBatchDrag} onKeyDown={e=>moveBatchWithKeys(e,`current-${i}`,currentWidth)} onClick={()=>showBatchDetail(i===0?"Bolillo · 18,000 units":i===1?"Concha Rosa · 12,400 units":"Telera · 9,600 units")}><strong>{i===0?"Bolillo":i===1?"Concha Rosa":"Telera"}</strong><span>{i===0?"18,000":i===1?"12,400":"9,600"} {t("units")} · {i===0?t("Baking"):t("In progress")}</span></button>
+   <button style={{left:`${batchPositions[`next-${i}`]}%`,width:`${nextWidth}%`}} className="schedule-block draggable-batch block-neutral" data-time={batchTime(batchPositions[`next-${i}`],nextWidth)} aria-label={`${i===0?"Telera":i===1?"Chocolate concha":"Empanada"}, ${batchTime(batchPositions[`next-${i}`],nextWidth)}. ${locale === "es" ? "Arrastrar para reprogramar" : "Drag to reschedule"}`} onPointerDown={e=>startBatchDrag(e,`next-${i}`,nextWidth)} onPointerMove={moveBatch} onPointerUp={endBatchDrag} onPointerCancel={endBatchDrag} onKeyDown={e=>moveBatchWithKeys(e,`next-${i}`,nextWidth)} onClick={()=>showBatchDetail("Scheduled batch · ingredient check pending")}><strong>{i===0?"Telera":i===1?"Chocolate concha":"Empanada"}</strong><span>{t("Next batch · ready")}</span></button>
+    {scenarioPlan&&i===(scenarioPlan.option===1?2:1)&&<button className="schedule-block draggable-batch block-new" style={{left:`${batchPositions.scenario}%`,width:"38%"}} data-time={batchTime(batchPositions.scenario,38)} aria-label={`Gallo Giro, ${batchTime(batchPositions.scenario,38)}. ${locale === "es" ? "Arrastrar para reprogramar" : "Drag to reschedule"}`} onPointerDown={e=>startBatchDrag(e,"scenario",38)} onPointerMove={moveBatch} onPointerUp={endBatchDrag} onPointerCancel={endBatchDrag} onKeyDown={e=>moveBatchWithKeys(e,"scenario",38)} onClick={()=>showBatchDetail("Scenario order · "+scenarioPlan.qty.toLocaleString()+" conchas")}><strong>+ Gallo Giro · {scenarioPlan.qty.toLocaleString()}</strong><span>{scenarioPlan.option===2?"Saturday":times.join("–")} · demo plan</span></button>}
     <div className="now-line" style={{left:"31%"}}><span>{i===0?t("NOW · 09:00"):""}</span></div>
-   </div></div>)}</div></div>
+   </div></div>})}</div></div>
   <div className="schedule-footer"><span><i/>{t("Current batches")}</span><span><i/>{t("Upcoming batches")}</span><span>{t("Schematic demo · timings are illustrative")}</span></div>
   </section>
   <section className="action-ribbon"><div><TriangleAlert size={22}/><span><strong>{t("One quality hold needs review")}</strong><small>{t("Flour FL-8831 · three queued batches affected")}</small></span><button onClick={()=>go("quality")}>{t("Review hold")} <ArrowRight size={16}/></button></div><div><CircleCheck size={22}/><span><strong>{t("R365 remains the system of record")}</strong><small>{t("Accounting & inventory · simulated connection")}</small></span><button onClick={()=>go("sync")}>{t("Data ownership")} <ArrowRight size={16}/></button></div></section>

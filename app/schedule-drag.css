@@ -1,0 +1,56 @@
+.draggable-batch {
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  transition: filter 0.2s, left 0.08s ease-out;
+}
+
+.draggable-batch:active {
+  z-index: 3;
+  cursor: grabbing;
+  filter: brightness(0.94);
+  transition: none;
+}
+
+.draggable-batch::after {
+  position: absolute;
+  top: 6px;
+  right: 7px;
+  padding: 2px 4px;
+  border-radius: 3px;
+  background: #ffffffd9;
+  color: currentcolor;
+  content: attr(data-time);
+  font-size: 8px;
+  font-weight: 650;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.draggable-batch:hover::after,
+.draggable-batch:focus-visible::after,
+.draggable-batch:active::after {
+  opacity: 1;
+}
+
+.schedule-demo-note {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: -6px 0 13px;
+  padding: 8px 10px;
+  border: 1px dashed #d9c6cf;
+  border-radius: 7px;
+  background: #fff9fb;
+  color: #8a6876;
+  font-size: 10px;
+}
+
+.schedule-demo-note button {
+  flex-shrink: 0;
+  color: #c33468;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
